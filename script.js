@@ -41,28 +41,6 @@ window.onload = function () {
     return false;
   }
 
-  // saves all item positions to the browser so they are remembered on next visit
-  function savePositions() {
-    var data = {};
-    var items = document.querySelectorAll('.draggable');
-    for (var i = 0; i < items.length; i++) {
-      var item = items[i];
-      // only save items that are currently placed inside the main container
-      if (item.parentElement === container) {
-        // skip pokemon shoes since they are not used in the pokemon tab
-        if (item.classList.contains('shoe-item') && item.dataset.tab === 'pokemon') { continue; }
-        // store the left position, top position, and layer order
-        data[item.alt] = {
-          left:   item.style.left,
-          top:    item.style.top,
-          zIndex: item.style.zIndex
-        };
-      }
-    }
-    // convert the data object to a string and store it in the browser
-    localStorage.setItem('outfit_positions', JSON.stringify(data));
-  }
-
   // figures out where each item should land when dropped on the character
   function getSnapPos(el, baseCX, baseTop, baseH, baseW, scale) {
 
@@ -83,7 +61,9 @@ window.onload = function () {
       // default: align hair to the very top of the character
       var snapY = baseTop;
       if (sy !== null) { snapY = baseTop + baseH * sy; }
-      return { x: baseCX - w * snapX, y: snapY };
+      // use natural (unscaled) width here because strawberry hair uses transform-origin top center
+      // which means the element box center stays fixed regardless of scale, so scale does not affect x placement
+      return { x: baseCX - el.offsetWidth * snapX, y: snapY };
     }
 
     if (el.classList.contains('acc-item')) {
@@ -272,10 +252,17 @@ window.onload = function () {
       var elLeft  = parseFloat(el.style.left) || 0;
       var elTop   = parseFloat(el.style.top)  || 0;
 
-      // get the item scale from its data attribute in the html
+      // get the item's visual scale from its transform
+      // pokemon items have CSS transform so it comes through as matrix(), strawberry items have inline scale()
       var scale = 1;
-      if (el.dataset.scale) {
-        scale = parseFloat(el.dataset.scale);
+      if (ownTransform && ownTransform !== 'none') {
+        var matrixMatch = ownTransform.match(/matrix\(([^,]+)/);
+        if (matrixMatch) {
+          scale = Math.abs(parseFloat(matrixMatch[1])) || 1;
+        } else {
+          var scaleMatch = ownTransform.match(/scale\(([^)]+)/);
+          if (scaleMatch) { scale = Math.abs(parseFloat(scaleMatch[1])) || 1; }
+        }
       }
 
       // calculate the center point of the item
@@ -290,10 +277,7 @@ window.onload = function () {
       var dist  = Math.sqrt(distX * distX + distY * distY);
 
       // if dropped too far away just leave it where it is
-      if (dist >= 350) {
-        savePositions();
-        return;
-      }
+      if (dist >= 350) { return; }
 
       // remember which hair is now on the character
       if (el.classList.contains('hair-item')) {
@@ -305,11 +289,7 @@ window.onload = function () {
       el.style.transition = 'left 0.2s, top 0.2s';
       el.style.left = snap.x + 'px';
       el.style.top  = snap.y + 'px';
-      // after the animation finishes remove the transition and save
-      setTimeout(function () {
-        el.style.transition = '';
-        savePositions();
-      }, 220);
+      setTimeout(function () { el.style.transition = ''; }, 220);
     }
 
     // mouse events for desktop
@@ -445,45 +425,9 @@ window.onload = function () {
     });
   }
 
-  // start the page on the pokemon tab
-  container.classList.add('tab-pokemon');
-
-  // default positions for pokemon items when there is no saved data
-  var defaultPositions = {
-    pokdress1: { left: '51px',  top: '198px', zIndex: '5' },
-    pokdress2: { left: '91px',  top: '198px', zIndex: '4' },
-    pokdress3: { left: '190px', top: '195px', zIndex: '3' },
-    pokdress4: { left: '269px', top: '195px', zIndex: '2' },
-    poktop1:   { left: '370px', top: '195px', zIndex: '5' },
-    pokshort1: { left: '370px', top: '280px', zIndex: '1' },
-    pokbag4:   { left: '212px', top: '550px', zIndex: '4' },
-    pokbag2:   { left: '269px', top: '542px', zIndex: '3' },
-    pokbag3:   { left: '320px', top: '550px', zIndex: '2' },
-    pokbag1:   { left: '382px', top: '541px', zIndex: '1' },
-  };
-
-  // use saved positions if they exist otherwise use the defaults above
-  var savedData = localStorage.getItem('outfit_positions');
-  var positions;
-  if (savedData) {
-    positions = JSON.parse(savedData);
-  } else {
-    positions = defaultPositions;
-  }
-
-  // place each item at its saved position inside the container
-  for (var alt in positions) {
-    var pos   = positions[alt];
-    // find the image element whose alt text matches this key
-    var posEl = document.querySelector(`.draggable[alt="${alt}"]`);
-    if (!posEl) { continue; }
-    posEl.style.left     = pos.left;
-    posEl.style.top      = pos.top;
-    posEl.style.zIndex   = pos.zIndex;
-    posEl.style.position = 'absolute';
-    // move it into the container so it appears on the canvas
-    container.appendChild(posEl);
-  }
+  // run switchTab now so wrong-tab items get hidden immediately
+  switchTab('pokemon');
+  document.querySelector('.tab-btn[data-tab="pokemon"]').classList.add('active');
 
   // wrapper divs should not intercept clicks meant for the items inside them
   var wrappers = document.querySelectorAll('.pokbag-wrapper, .shorts-wrapper, .dress-wrapper, .top-wrapper');

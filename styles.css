@@ -165,6 +165,7 @@
   width: 180px;
   transform: scale(0.6);
   transform-origin: top left;
+  pointer-events: auto;
 }
 .top-item:nth-child(1) { top: 0px; left: 0px; }
 
@@ -202,6 +203,7 @@
   width: 300px;
   transform: scale(0.45);
   transform-origin: top left;
+  pointer-events: auto;
 }
 
 
@@ -226,7 +228,7 @@
 .pokbag-wrapper {
   position: absolute;
   top: 530px;
-  left: 55px;
+  left: 110px;
   z-index: 6;
   width: 420px;
   height: 300px;
@@ -238,6 +240,7 @@
   width: 155px;
   transform: scale(0.55);
   transform-origin: top left;
+  pointer-events: auto;
 }
 
 .shorts-wrapper {
@@ -255,6 +258,7 @@
   transform: scale(0.3);
   transform-origin: top left;
   top: 0; left: 0;
+  pointer-events: auto;
 }
 
 .shoe-wrapper {
