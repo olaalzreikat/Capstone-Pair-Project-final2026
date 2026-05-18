@@ -297,7 +297,7 @@
       transform-origin: bottom left;
       width: 700px;
       min-height: 850px;
-      background: url('section1.png.png') center center / 100% 100% no-repeat;
+      background: url('section1.png') center center / 100% 100% no-repeat;
       border-radius: 20px;
       box-shadow:
         0 8px 32px rgba(100, 60, 0, 0.18);
