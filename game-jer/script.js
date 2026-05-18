@@ -1,6 +1,7 @@
 const squirtleImg = new Image();
 squirtleImg.src = 'squirtle-sprite2.png';
 
+//image local getting from dres up game
 let playerImg = squirtleImg;
 const _savedSprite = localStorage.getItem('outfit_sprite');
 if (_savedSprite) {
@@ -24,6 +25,7 @@ pokeballImg.src = 'pokeballs.PNG';
 const strawberryImg = new Image();
 strawberryImg.src = 'strawberry.png';
 
+//enemy images to randomize them
 const ENEMY_SOURCES = [
     'enemy.PNG',
     'iggly-pokm.png',
@@ -39,6 +41,7 @@ const enemyImages = ENEMY_SOURCES.map(src => {
 })
 
 const levelW=2600;
+//levels mega list with all level info inside.
 const LEVELS = {
     1: {
         platforms: [
@@ -120,6 +123,7 @@ if (ballDisp) ballDisp.textContent = 'Pokeballs: 0/20';
 if (livesDisp) livesDisp.textContent = 'Lives: 3'; 
 if (timerDisp) timerDisp.textContent = 'Time: 00:00';
 
+//player initialization with all traits
 const P={x:80,y:320,vx:0,vy:0,w:42,h:92,onGround:false,facing:'right',inv:0};
 const keys={};
 document.addEventListener('keydown',e=>{
@@ -211,13 +215,16 @@ const maxFall   = 18;
 const friction  = 0.82;
 const airFric   = 0.95;
 
+//collision start
 function overlap(a, b) {
   return a.x < b.x+b.w && a.x+a.w > b.x && a.y < b.y+b.h && a.y+a.h > b.y;
 }
 
+//checking if every ball has attribute set to true
 function checkWinCondition() {
     const allBallsCollected = pokeballs.every(b => b.collected);
-    
+
+  //checking if all enemies alive var is set to false.
     if (currentLevel === 2) {
         const allEnemiesDefeated = enemies.every(e => !e.alive);
         return allBallsCollected && allEnemiesDefeated;
@@ -240,11 +247,11 @@ function update(){
     P.vy = jumpForce;
     P.onGround = false;
   }
-
+//gravity
   P.vy = Math.min(P.vy + gravity, maxFall);
   P.x = Math.max(0, Math.min(P.x + P.vx, levelW - P.w));
   P.y += P.vy;
-
+//all real collision
   P.onGround = false;
   for (const p of platforms) {
     if (!overlap(P, p)) continue;
