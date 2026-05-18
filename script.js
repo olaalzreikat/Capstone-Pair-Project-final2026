@@ -16,7 +16,7 @@ window.onload = function () {
   bg.style.backgroundImage = "url('pokemonbg.jpg')";
 
   // clicking the character body cycles through skin tones
-  var skins     = ['base1.PNG', 'base2.png', 'base3.png'];
+  var skins     = ['base1.PNG', 'base2.PNG', 'base3.PNG'];
   var baseBody  = document.getElementById('base');
   var skinIndex = 0;
   baseBody.addEventListener('click', function () {
